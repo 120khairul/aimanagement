@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curriculum Form | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Curriculum</p>
+            <h1 th:text="${curriculum.id == null ? 'Create Curriculum' : 'Update Curriculum'}">Curriculum</h1>
+        </div>
+    </div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${curriculum}" method="post">
+        <div class="form-grid">
+            <label>
+                Program Name
+                <input type="text" th:field="*{programName}" required>
+            </label>
+            <label>
+                Course Code
+                <input type="text" th:field="*{courseCode}" required>
+            </label>
+            <label>
+                Course Title
+                <input type="text" th:field="*{courseTitle}" required>
+            </label>
+            <label>
+                Credit Hours
+                <input type="number" th:field="*{creditHours}" min="1" required>
+            </label>
+            <label>
+                Version
+                <input type="text" th:field="*{versionName}" placeholder="Version 1.0">
+            </label>
+            <label>
+                Effective From
+                <input type="date" th:field="*{effectiveFrom}">
+            </label>
+            <label>
+                Status
+                <select th:field="*{status}">
+                    <option th:each="status : ${curriculumStatuses}" th:value="${status}" th:text="${status.displayName}">Status</option>
+                </select>
+            </label>
+        </div>
+
+        <label>
+            Course Learning Outcomes
+            <textarea th:field="*{courseLearningOutcomes}" rows="5" required></textarea>
+        </label>
+        <label>
+            Program Learning Outcomes
+            <textarea th:field="*{programLearningOutcomes}" rows="4"></textarea>
+        </label>
+        <label>
+            Industry Alignment
+            <textarea th:field="*{industryAlignment}" rows="4"></textarea>
+        </label>
+        <label>
+            Peer Benchmarking
+            <textarea th:field="*{peerBenchmarking}" rows="4" placeholder="Compare topics and outcomes with peer universities or standard curricula"></textarea>
+        </label>
+        <label>
+            Emerging Technology Trends
+            <textarea th:field="*{emergingTechnologyTrends}" rows="4" placeholder="AI, cloud, cybersecurity, data analytics, or other updates"></textarea>
+        </label>
+        <label>
+            Stakeholder Feedback
+            <textarea th:field="*{stakeholderFeedback}" rows="4"></textarea>
+        </label>
+        <label>
+            Revision Proposal
+            <textarea th:field="*{revisionProposal}" rows="4"></textarea>
+        </label>
+        <label>
+            Version History
+            <textarea th:field="*{versionHistory}" rows="4"></textarea>
+        </label>
+        <button type="submit">Save Curriculum</button>
+    </form>
+</main>
+</body>
+</html>

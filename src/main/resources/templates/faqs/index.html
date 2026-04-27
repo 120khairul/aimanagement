@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="hero-band">
+        <div>
+            <p class="eyebrow">Teaching Materials, Notes & FAQs</p>
+            <h1>Shared answers for repeated student questions</h1>
+            <p>Keep course communication consistent and generate helpful draft answers with OpenAI when needed.</p>
+        </div>
+        <a class="button" th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/faqs/new}">New FAQ</a>
+    </div>
+
+    <section class="faq-list">
+        <article class="faq-card" th:each="faq : ${faqs}">
+            <div class="faq-top">
+                <span class="badge" th:text="${faq.category == null ? 'General' : faq.category}">Category</span>
+                <span class="ai-chip" th:if="${faq.generatedByAi}">AI Draft</span>
+            </div>
+            <h2 th:text="${faq.question}">Question</h2>
+            <p th:text="${faq.answer}">Answer</p>
+            <div class="meta">
+                <span th:text="${faq.course == null ? 'All courses' : faq.course.code}">Course</span>
+                <span th:text="${faq.createdBy == null ? 'System' : faq.createdBy.fullName}">Creator</span>
+            </div>
+            <div class="actions" th:if="${currentUser.admin or currentUser.faculty}">
+                <a class="button secondary" th:href="@{/faqs/{id}/edit(id=${faq.id})}">Edit</a>
+                <form th:action="@{/faqs/{id}/delete(id=${faq.id})}" method="post">
+                    <button class="danger" type="submit">Delete</button>
+                </form>
+            </div>
+        </article>
+
+        <article class="empty-state" th:if="${#lists.isEmpty(faqs)}">
+            <h2>No FAQs yet</h2>
+            <p>Add common questions so students can find answers faster.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

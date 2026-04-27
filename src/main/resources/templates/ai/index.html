@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="hero-band ai-hero">
+        <div>
+            <p class="eyebrow">OpenAI Assistant</p>
+            <h1>Generate academic drafts faster</h1>
+            <p>Use this panel for feedback, quiz questions, FAQ answers, curriculum mapping notes, capstone screening, and report summaries.</p>
+        </div>
+        <span class="ai-chip" th:text="${openAiEnabled ? 'OpenAI active: ' + openAiModel : 'OPENAI_API_KEY missing'}">AI status</span>
+    </div>
+
+    <section class="two-column ai-workspace">
+        <article class="section">
+            <div class="section-title">
+                <h2>Ask AI</h2>
+            </div>
+
+            <div class="alert info" th:if="${!openAiEnabled}">
+                Add `OPENAI_API_KEY` in IntelliJ run configuration to use real OpenAI output. Until then, local fallback mode will keep the page working.
+            </div>
+
+            <form class="stack" th:action="@{/ai/generate}" method="post">
+                <label>
+                    Task Type
+                    <select name="taskType">
+                        <option th:selected="${taskType == 'Student Feedback'}">Student Feedback</option>
+                        <option th:selected="${taskType == 'Quiz Generation'}">Quiz Generation</option>
+                        <option th:selected="${taskType == 'FAQ Answer'}">FAQ Answer</option>
+                        <option th:selected="${taskType == 'Curriculum Gap Analysis'}">Curriculum Gap Analysis</option>
+                        <option th:selected="${taskType == 'Capstone Screening'}">Capstone Screening</option>
+                        <option th:selected="${taskType == 'Report Summary'}">Report Summary</option>
+                    </select>
+                </label>
+
+                <label>
+                    What do you want?
+                    <textarea name="prompt" rows="4" required th:text="${prompt}">Draft feedback for a student submission.</textarea>
+                </label>
+
+                <label>
+                    Context
+                    <textarea name="context" rows="10" placeholder="Paste marks, rubric, student answer, course outcomes, FAQ question, or project proposal here." th:text="${context}"></textarea>
+                </label>
+
+                <button type="submit">Generate With AI</button>
+            </form>
+        </article>
+
+        <article class="section result-panel">
+            <div class="section-title">
+                <h2>Output</h2>
+                <span class="badge" th:text="${taskType}">Task</span>
+            </div>
+            <pre class="suggestion result-box" th:text="${output == null ? 'Your AI output will appear here.' : output}">Output</pre>
+        </article>
+    </section>
+
+    <section class="quick-actions ai-presets">
+        <button type="button" class="preset-card" data-task="Student Feedback"
+                data-prompt="Draft personalized feedback with strengths, weaknesses, grade justification, and next steps.">
+            Student Feedback
+        </button>
+        <button type="button" class="preset-card" data-task="Quiz Generation"
+                data-prompt="Create 5 questions: 2 MCQ, 2 short answer, and 1 analytical question. Include answers.">
+            Quiz Questions
+        </button>
+        <button type="button" class="preset-card" data-task="Curriculum Gap Analysis"
+                data-prompt="Analyze CLO/PLO alignment, gaps, emerging technology coverage, and revision priorities.">
+            Curriculum Gap
+        </button>
+        <button type="button" class="preset-card" data-task="Capstone Screening"
+                data-prompt="Screen the capstone proposal for strengths, risks, originality, feasibility, and approval recommendation.">
+            Capstone Screen
+        </button>
+    </section>
+</main>
+
+<script>
+    document.querySelectorAll(".preset-card").forEach(function (button) {
+        button.addEventListener("click", function () {
+            document.querySelector("select[name='taskType']").value = button.dataset.task;
+            document.querySelector("textarea[name='prompt']").value = button.dataset.prompt;
+            document.querySelector("textarea[name='context']").focus();
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courses | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Course Delivery</p>
+            <h1>Courses</h1>
+        </div>
+        <a class="button" th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/courses/new}">Create Course</a>
+    </div>
+
+    <section class="item-grid">
+        <article class="item-card" th:each="course : ${courses}">
+            <div>
+                <span class="badge" th:text="${course.code}">CSE-000</span>
+                <h2 th:text="${course.title}">Course title</h2>
+                <p th:text="${course.description}">Description</p>
+            </div>
+            <div class="meta">
+                <span th:text="${course.semester}">Semester</span>
+                <span th:text="${course.teacher == null ? 'No teacher' : course.teacher.fullName}">Teacher</span>
+            </div>
+            <a class="button secondary" th:href="@{/courses/{id}(id=${course.id})}">Open Course</a>
+        </article>
+        <article class="empty-state" th:if="${#lists.isEmpty(courses)}">
+            <h2>No courses yet</h2>
+            <p>Create the first course to start uploading materials and assigning assessments.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

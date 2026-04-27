@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${course.code} + ' | Academic Feedback'">Course</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow" th:text="${course.code}">Course code</p>
+            <h1 th:text="${course.title}">Course title</h1>
+            <p class="muted" th:text="${course.description}">Description</p>
+        </div>
+        <div class="actions" th:if="${currentUser.admin or currentUser.faculty}">
+            <a class="button secondary" th:href="@{/courses/{id}/edit(id=${course.id})}">Edit Course</a>
+            <a class="button" th:href="@{/assignments/new(courseId=${course.id})}">Add Assignment</a>
+            <form th:action="@{/courses/{id}/delete(id=${course.id})}" method="post">
+                <button class="danger" type="submit">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="two-column">
+        <article class="section">
+            <div class="section-title">
+                <h2>Assignments</h2>
+            </div>
+            <div class="list">
+                <a class="list-row" th:each="assignment : ${course.assignments}"
+                   th:href="@{/assignments/{id}(id=${assignment.id})}">
+                    <strong th:text="${assignment.title}">Assignment</strong>
+                    <span th:text="'Due: ' + ${assignment.dueDate}">Due</span>
+                    <span th:text="${assignment.maxMarks} + ' marks'">Marks</span>
+                </a>
+                <p class="muted" th:if="${#lists.isEmpty(course.assignments)}">No assignments yet.</p>
+            </div>
+        </article>
+
+        <article class="section">
+            <div class="section-title">
+                <h2>Materials</h2>
+            </div>
+            <div class="list">
+                <div class="list-row" th:each="material : ${course.materials}">
+                    <a th:href="${material.resourceLink}" target="_blank">
+                        <strong th:text="${material.title}">Material</strong>
+                    </a>
+                    <span th:text="${material.materialType.displayName}">Type</span>
+                    <form th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/materials/{id}/delete(id=${material.id})}" method="post">
+                        <button class="danger" type="submit">Delete</button>
+                    </form>
+                </div>
+                <p class="muted" th:if="${#lists.isEmpty(course.materials)}">No materials uploaded yet.</p>
+            </div>
+        </article>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>Participation & Engagement</h2>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Attendance</th>
+                    <th>Participation</th>
+                    <th>LMS Activity</th>
+                    <th>Risk</th>
+                    <th>Remarks</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="record : ${engagementRecords}">
+                    <td th:text="${record.student.fullName}">Student</td>
+                    <td th:text="${record.attendancePercentage == null ? 'N/A' : record.attendancePercentage + '%'}">Attendance</td>
+                    <td th:text="${record.participationScore == null ? 'N/A' : record.participationScore}">Participation</td>
+                    <td th:text="${record.lmsActivityScore == null ? 'N/A' : record.lmsActivityScore}">Activity</td>
+                    <td><span class="badge" th:text="${record.riskLevel}">Risk</span></td>
+                    <td th:text="${record.remarks}">Remarks</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(engagementRecords)}">
+                    <td colspan="6">No engagement records yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form class="panel stack top-space" th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/courses/{id}/engagement(id=${course.id})}" method="post">
+            <div class="form-grid">
+                <label>
+                    Student
+                    <select name="studentId" required>
+                        <option th:each="student : ${students}" th:value="${student.id}" th:text="${student.fullName}">Student</option>
+                    </select>
+                </label>
+                <label>
+                    Attendance %
+                    <input type="number" step="0.01" min="0" max="100" name="attendancePercentage">
+                </label>
+                <label>
+                    Participation Score
+                    <input type="number" step="0.01" min="0" max="100" name="participationScore">
+                </label>
+                <label>
+                    LMS Activity Score
+                    <input type="number" step="0.01" min="0" max="100" name="lmsActivityScore">
+                </label>
+                <label>
+                    Risk Level
+                    <select name="riskLevel">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                Remarks
+                <textarea name="remarks" rows="3"></textarea>
+            </label>
+            <button type="submit">Save Engagement</button>
+        </form>
+    </section>
+
+    <section class="two-column" th:if="${currentUser.admin or currentUser.faculty}">
+        <article class="section">
+            <div class="section-title">
+                <h2>Add Material</h2>
+            </div>
+            <form class="stack" th:action="@{/courses/{id}/materials(id=${course.id})}" method="post">
+                <label>
+                    Title
+                    <input type="text" name="title" required>
+                </label>
+                <label>
+                    Type
+                    <select name="materialType">
+                        <option th:each="type : ${materialTypes}" th:value="${type}" th:text="${type.displayName}">Type</option>
+                    </select>
+                </label>
+                <label>
+                    Link
+                    <input type="url" name="resourceLink" placeholder="https://example.com/resource" required>
+                </label>
+                <button type="submit">Add Material</button>
+            </form>
+        </article>
+
+        <article class="section">
+            <div class="section-title">
+                <h2>AI Quiz Suggestions</h2>
+                <form th:action="@{/courses/{id}/ai-quiz(id=${course.id})}" method="post">
+                    <button type="submit">Generate</button>
+                </form>
+            </div>
+            <p class="muted" th:text="${openAiEnabled ? 'Using OpenAI model: ' + openAiModel : 'Set OPENAI_API_KEY for real OpenAI output. Local fallback still works.'}">AI status</p>
+            <pre class="suggestion" th:text="${course.aiQuizSuggestions == null ? 'Click Generate to create quiz questions and assessment prompts.' : course.aiQuizSuggestions}">Suggestions</pre>
+        </article>
+    </section>
+</main>
+</body>
+</html>

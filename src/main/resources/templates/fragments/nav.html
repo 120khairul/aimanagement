@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="topbar" th:fragment="navbar">
+    <a class="brand" th:href="@{/dashboard}"><span>AF</span> Academic Feedback</a>
+    <div class="nav-links" th:if="${currentUser != null}">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/ai}">AI Tools</a>
+        <a th:href="@{/courses}">Courses</a>
+        <a th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/curriculums}">Curriculum</a>
+        <a th:href="@{/faqs}">FAQs</a>
+        <a th:href="@{/capstones}">Capstone</a>
+        <a th:if="${currentUser.admin}" th:href="@{/users}">Users</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+    <div class="user-chip" th:if="${currentUser != null}">
+        <span th:text="${currentUser.fullName}">User</span>
+        <small th:text="${currentUser.role.displayName}">Role</small>
+    </div>
+</nav>
+</body>
+</html>

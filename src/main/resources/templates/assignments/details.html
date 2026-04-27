@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${assignment.title} + ' | Academic Feedback'">Assignment</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow" th:text="${assignment.course.code}">Course</p>
+            <h1 th:text="${assignment.title}">Assignment</h1>
+            <p class="muted" th:text="${assignment.instructions}">Instructions</p>
+        </div>
+        <div class="actions">
+            <a class="button secondary" th:href="@{/courses/{id}(id=${assignment.course.id})}">Back to Course</a>
+            <a class="button secondary" th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/assignments/{id}/edit(id=${assignment.id})}">Edit</a>
+            <form th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/assignments/{id}/delete(id=${assignment.id})}" method="post">
+                <button class="danger" type="submit">Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="stats-grid compact">
+        <article class="stat-card">
+            <span>Due Date</span>
+            <strong th:text="${assignment.dueDate == null ? 'Open' : assignment.dueDate}">Date</strong>
+        </article>
+        <article class="stat-card">
+            <span>Max Marks</span>
+            <strong th:text="${assignment.maxMarks}">100</strong>
+        </article>
+        <article class="stat-card">
+            <span>Submissions</span>
+            <strong th:text="${#lists.size(submissions)}">0</strong>
+        </article>
+    </section>
+
+    <section class="section" th:if="${currentUser.student}">
+        <div class="section-title">
+            <h2>Your Submission</h2>
+        </div>
+
+        <form class="stack" th:if="${mySubmission == null or mySubmission.status.name() == 'RESUBMISSION_REQUESTED'}" th:action="@{/assignments/{id}/submit(id=${assignment.id})}" method="post">
+            <label>
+                Answer / Submission Text
+                <textarea name="content" rows="8" required th:text="${mySubmission == null ? '' : mySubmission.content}"></textarea>
+            </label>
+            <button type="submit" th:text="${mySubmission == null ? 'Submit Assignment' : 'Submit Revised Work'}">Submit</button>
+        </form>
+
+        <div class="student-submission" th:if="${mySubmission != null and mySubmission.status.name() != 'RESUBMISSION_REQUESTED'}">
+            <span class="badge" th:text="${mySubmission.status.displayName}">Status</span>
+            <p th:text="${mySubmission.content}">Content</p>
+            <p><strong>Marks:</strong> <span th:text="${mySubmission.marks == null ? 'Pending' : mySubmission.marks + ' / ' + assignment.maxMarks}">Marks</span></p>
+            <p><strong>Grade:</strong> <span th:text="${mySubmission.grade == null ? 'Pending' : mySubmission.grade}">Grade</span></p>
+            <p><strong>Feedback:</strong> <span th:text="${mySubmission.feedback == null ? 'No feedback yet' : mySubmission.feedback}">Feedback</span></p>
+
+            <form class="stack" th:if="${mySubmission.marks != null}" th:action="@{/submissions/{id}/recheck(id=${mySubmission.id})}" method="post">
+                <label>
+                    Recheck Reason
+                    <textarea name="recheckReason" rows="3" required></textarea>
+                </label>
+                <button type="submit">Request Recheck</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="section" th:if="${currentUser.admin or currentUser.faculty}">
+        <div class="section-title">
+            <h2>Submission Evaluation</h2>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Submission</th>
+                    <th>Status</th>
+                    <th>Marks</th>
+                    <th>Grade / Feedback</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="submission : ${submissions}">
+                    <td th:text="${submission.student.fullName}">Student</td>
+                    <td class="clamp" th:text="${submission.content}">Content</td>
+                    <td>
+                        <span class="badge" th:text="${submission.status.displayName}">Status</span>
+                        <small class="block" th:if="${submission.recheckReason != null}"
+                               th:text="'Reason: ' + ${submission.recheckReason}">Reason</small>
+                    </td>
+                    <td th:text="${submission.marks == null ? 'Pending' : submission.marks + ' / ' + assignment.maxMarks}">Marks</td>
+                    <td>
+                        <form class="inline-form" th:action="@{/submissions/{id}/grade(id=${submission.id})}" method="post">
+                            <input type="number" step="0.01" min="0" th:max="${assignment.maxMarks}" name="marks"
+                                   th:value="${submission.marks}" required>
+                            <textarea name="feedback" rows="3"
+                                      placeholder="Leave blank to generate AI draft"
+                                      th:text="${submission.feedback}"></textarea>
+                            <button type="submit">Grade</button>
+                        </form>
+                        <form class="top-space" th:action="@{/submissions/{id}/resubmission(id=${submission.id})}" method="post">
+                            <button class="button secondary" type="submit">Request Resubmission</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(submissions)}">
+                    <td colspan="5">No submissions yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

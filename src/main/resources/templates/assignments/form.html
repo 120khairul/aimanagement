@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Assignment | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page narrow">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Assessment</p>
+            <h1 th:text="${assignment.id == null ? 'Create Assignment' : 'Update Assignment'}">Create Assignment</h1>
+        </div>
+    </div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${assignment}" method="post">
+        <label>
+            Course
+            <select name="courseId" required>
+                <option th:each="course : ${courses}"
+                        th:value="${course.id}"
+                        th:selected="${assignment.course != null and assignment.course.id == course.id}"
+                        th:text="${course.code + ' - ' + course.title}">Course</option>
+            </select>
+        </label>
+        <label>
+            Title
+            <input type="text" th:field="*{title}" required>
+        </label>
+        <label>
+            Due Date
+            <input type="date" th:field="*{dueDate}">
+        </label>
+        <label>
+            Max Marks
+            <input type="number" th:field="*{maxMarks}" min="1" required>
+        </label>
+        <label>
+            Instructions
+            <textarea th:field="*{instructions}" rows="7"></textarea>
+        </label>
+        <button type="submit">Save Assignment</button>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone Form | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Capstone</p>
+            <h1 th:text="${project.id == null ? 'Submit Project Proposal' : 'Update Project'}">Capstone</h1>
+        </div>
+    </div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${project}" method="post">
+        <div class="form-grid">
+            <label>
+                Project Title
+                <input type="text" th:field="*{title}" required>
+            </label>
+            <label>
+                Team Members
+                <input type="text" th:field="*{teamMembers}" placeholder="Name 1, Name 2">
+            </label>
+            <label>
+                Technology Stack
+                <input type="text" th:field="*{technologyStack}" placeholder="Java, Spring Boot, MySQL">
+            </label>
+            <label>
+                Originality Score
+                <input type="number" step="0.01" min="0" max="100" th:field="*{originalityScore}">
+            </label>
+            <label>
+                Status
+                <select th:field="*{status}">
+                    <option th:each="status : ${capstoneStatuses}" th:value="${status}" th:text="${status.displayName}">Status</option>
+                </select>
+            </label>
+            <label>
+                Supervisor
+                <select name="supervisorId">
+                    <option value="">Unassigned</option>
+                    <option th:each="faculty : ${facultyUsers}"
+                            th:value="${faculty.id}"
+                            th:selected="${project.supervisor != null and project.supervisor.id == faculty.id}"
+                            th:text="${faculty.fullName}">Faculty</option>
+                </select>
+            </label>
+            <label>
+                Co-supervisor
+                <select name="coSupervisorId">
+                    <option value="">Unassigned</option>
+                    <option th:each="faculty : ${facultyUsers}"
+                            th:value="${faculty.id}"
+                            th:selected="${project.coSupervisor != null and project.coSupervisor.id == faculty.id}"
+                            th:text="${faculty.fullName}">Faculty</option>
+                </select>
+            </label>
+        </div>
+        <label>
+            Proposal Summary
+            <textarea th:field="*{proposalSummary}" rows="8" required></textarea>
+        </label>
+        <button type="submit">Save Project</button>
+    </form>
+</main>
+</body>
+</html>

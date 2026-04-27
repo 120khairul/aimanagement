@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capstone | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="hero-band">
+        <div>
+            <p class="eyebrow">Capstone Supervision & Evaluation</p>
+            <h1>Proposals, supervisors, milestones, rubrics, and reports</h1>
+            <p>Track project progress from proposal screening to milestone review and final evaluation.</p>
+        </div>
+        <a class="button" th:href="@{/capstones/new}">New Project</a>
+    </div>
+
+    <section class="item-grid">
+        <article class="item-card" th:each="project : ${projects}">
+            <div>
+                <span class="badge" th:text="${project.status.displayName}">Status</span>
+                <h2 th:text="${project.title}">Project</h2>
+                <p th:text="${project.proposalSummary}">Summary</p>
+            </div>
+            <div class="meta">
+                <span th:text="${project.supervisor == null ? 'No supervisor' : project.supervisor.fullName}">Supervisor</span>
+                <span th:text="${project.originalityScore == null ? 'Originality pending' : project.originalityScore + '% originality'}">Originality</span>
+                <span th:text="${#lists.size(project.milestones)} + ' milestones'">Milestones</span>
+            </div>
+            <a class="button secondary" th:href="@{/capstones/{id}(id=${project.id})}">Open Project</a>
+        </article>
+
+        <article class="empty-state" th:if="${#lists.isEmpty(projects)}">
+            <h2>No capstone projects yet</h2>
+            <p>Submit a proposal to assign supervisors and start milestone tracking.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

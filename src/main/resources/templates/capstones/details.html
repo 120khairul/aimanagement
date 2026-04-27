@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${project.title} + ' | Capstone'">Capstone</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Capstone Project</p>
+            <h1 th:text="${project.title}">Project</h1>
+            <p class="muted" th:text="${project.proposalSummary}">Proposal</p>
+        </div>
+        <div class="actions">
+            <a class="button secondary" th:href="@{/capstones/{id}/edit(id=${project.id})}">Edit</a>
+            <form th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/capstones/{id}/ai-screen(id=${project.id})}" method="post">
+                <button type="submit">AI Screen Proposal</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="stats-grid compact">
+        <article class="stat-card">
+            <span>Status</span>
+            <strong th:text="${project.status.displayName}">Status</strong>
+        </article>
+        <article class="stat-card">
+            <span>Supervisor</span>
+            <strong th:text="${project.supervisor == null ? 'Unassigned' : project.supervisor.fullName}">Supervisor</strong>
+        </article>
+        <article class="stat-card">
+            <span>Originality</span>
+            <strong th:text="${project.originalityScore == null ? 'Pending' : project.originalityScore + '%'}">Score</strong>
+        </article>
+    </section>
+
+    <section class="two-column">
+        <article class="section">
+            <div class="section-title">
+                <h2>Proposal Screening</h2>
+                <span class="ai-chip" th:text="${openAiEnabled ? 'OpenAI: ' + openAiModel : 'Local fallback mode'}">AI</span>
+            </div>
+            <pre class="suggestion" th:text="${project.aiScreening == null ? 'Run AI screening to review strengths, risks, originality, and approval recommendation.' : project.aiScreening}">Screening</pre>
+        </article>
+
+        <article class="section">
+            <div class="section-title">
+                <h2>Final Report Summary</h2>
+                <form th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/capstones/{id}/ai-report(id=${project.id})}" method="post">
+                    <button type="submit">Generate Summary</button>
+                </form>
+            </div>
+            <pre class="suggestion" th:text="${project.finalReportSummary == null ? 'Generate a summary after evaluations and milestones are recorded.' : project.finalReportSummary}">Summary</pre>
+        </article>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>Milestones</h2>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Milestone</th>
+                    <th>Due</th>
+                    <th>Status</th>
+                    <th>Deliverable & Feedback</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="milestone : ${project.milestones}">
+                    <td th:text="${milestone.title}">Title</td>
+                    <td th:text="${milestone.dueDate == null ? 'Open' : milestone.dueDate}">Due</td>
+                    <td><span class="badge" th:text="${milestone.status.displayName}">Status</span></td>
+                    <td>
+                        <form class="stack" th:action="@{/capstones/milestones/{id}(id=${milestone.id})}" method="post">
+                            <select name="status">
+                                <option th:each="status : ${milestoneStatuses}"
+                                        th:value="${status}"
+                                        th:selected="${milestone.status == status}"
+                                        th:text="${status.displayName}">Status</option>
+                            </select>
+                            <textarea name="deliverable" rows="3" th:text="${milestone.deliverable}"></textarea>
+                            <textarea name="feedback" rows="3" th:text="${milestone.feedback}"></textarea>
+                            <button type="submit">Update Milestone</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(project.milestones)}">
+                    <td colspan="4">No milestones yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <form class="panel stack top-space" th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/capstones/{id}/milestones(id=${project.id})}" th:object="${milestone}" method="post">
+            <div class="form-grid">
+                <label>
+                    Milestone Title
+                    <input type="text" th:field="*{title}" required>
+                </label>
+                <label>
+                    Due Date
+                    <input type="date" th:field="*{dueDate}">
+                </label>
+                <label>
+                    Status
+                    <select th:field="*{status}">
+                        <option th:each="status : ${milestoneStatuses}" th:value="${status}" th:text="${status.displayName}">Status</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                Deliverable
+                <textarea th:field="*{deliverable}" rows="3"></textarea>
+            </label>
+            <button type="submit">Add Milestone</button>
+        </form>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>Rubric Evaluations</h2>
+        </div>
+
+        <div class="list">
+            <article class="review-card" th:each="evaluation : ${project.evaluations}">
+                <div>
+                    <span class="badge" th:text="${evaluation.rubricName}">Rubric</span>
+                    <h3 th:text="${evaluation.score + ' / ' + evaluation.maxScore}">Score</h3>
+                    <p th:text="${evaluation.comments}">Comments</p>
+                    <pre class="suggestion" th:text="${evaluation.aiFeedback == null ? 'No AI feedback generated.' : evaluation.aiFeedback}">AI</pre>
+                </div>
+            </article>
+            <p class="muted" th:if="${#lists.isEmpty(project.evaluations)}">No evaluations yet.</p>
+        </div>
+
+        <form class="panel stack top-space" th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/capstones/{id}/evaluations(id=${project.id})}" th:object="${evaluation}" method="post">
+            <div class="form-grid">
+                <label>
+                    Rubric Name
+                    <input type="text" th:field="*{rubricName}" required>
+                </label>
+                <label>
+                    Score
+                    <input type="number" step="0.01" min="0" th:field="*{score}">
+                </label>
+                <label>
+                    Max Score
+                    <input type="number" step="0.01" min="1" th:field="*{maxScore}">
+                </label>
+            </div>
+            <label>
+                Comments
+                <textarea th:field="*{comments}" rows="4"></textarea>
+            </label>
+            <label class="check-row">
+                <input type="checkbox" name="generateWithAi" value="true">
+                Generate AI evaluation feedback
+            </label>
+            <button type="submit">Save Evaluation</button>
+        </form>
+    </section>
+
+    <section class="section" th:if="${currentUser.admin or currentUser.faculty}">
+        <div class="section-title">
+            <h2>Project Control</h2>
+            <form th:action="@{/capstones/{id}/delete(id=${project.id})}" method="post">
+                <button class="danger" type="submit">Delete Project</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

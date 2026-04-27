@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+<main class="login-shell">
+    <section class="login-panel">
+        <p class="eyebrow">AI-driven Academic Feedback</p>
+        <h1>Sign in to continue</h1>
+        <p class="muted">Use a demo account to manage courses, assignments, submissions, marks, and feedback.</p>
+
+        <div class="alert" th:if="${error}" th:text="${error}">Invalid login</div>
+
+        <form th:action="@{/login}" method="post" class="stack">
+            <label>
+                Email
+                <input type="email" name="email" value="admin@demo.com" required>
+            </label>
+            <label>
+                Password
+                <input type="password" name="password" value="1234" required>
+            </label>
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="demo-users">
+            <strong>Demo users</strong>
+            <span>Admin: admin@demo.com / 1234</span>
+            <span>Faculty: faculty@demo.com / 1234</span>
+            <span>Student: student@demo.com / 1234</span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

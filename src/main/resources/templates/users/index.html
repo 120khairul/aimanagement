@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Administration</p>
+            <h1>User Management</h1>
+        </div>
+        <a class="button" th:href="@{/users/new}">Add User</a>
+    </div>
+
+    <section class="section">
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.fullName}">Name</td>
+                    <td th:text="${user.email}">Email</td>
+                    <td><span class="badge" th:text="${user.role.displayName}">Role</span></td>
+                    <td th:text="${user.department}">Department</td>
+                    <td th:text="${user.active ? 'Active' : 'Inactive'}">Active</td>
+                    <td>
+                        <div class="actions">
+                            <a class="button secondary" th:href="@{/users/{id}/edit(id=${user.id})}">Edit</a>
+                            <form th:action="@{/users/{id}/delete(id=${user.id})}" method="post">
+                                <button class="danger" type="submit">Deactivate</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curriculum | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="hero-band">
+        <div>
+            <p class="eyebrow">Curriculum Design & Update</p>
+            <h1>Outcome mapping, revision history, and AI gap analysis</h1>
+            <p>Track CLOs, PLOs, stakeholder feedback, curriculum revisions, and approval status in one workflow.</p>
+        </div>
+        <a class="button" th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/curriculums/new}">New Curriculum</a>
+    </div>
+
+    <section class="item-grid">
+        <article class="item-card" th:each="curriculum : ${curriculums}">
+            <div>
+                <span class="badge" th:text="${curriculum.status.displayName}">Status</span>
+                <h2 th:text="${curriculum.courseCode + ' - ' + curriculum.courseTitle}">Course</h2>
+                <p th:text="${curriculum.programName}">Program</p>
+            </div>
+            <div class="meta">
+                <span th:text="${curriculum.versionName}">Version</span>
+                <span th:text="${curriculum.creditHours + ' credits'}">Credits</span>
+                <span th:text="${curriculum.effectiveFrom == null ? 'No date' : curriculum.effectiveFrom}">Date</span>
+            </div>
+            <a class="button secondary" th:href="@{/curriculums/{id}(id=${curriculum.id})}">Open</a>
+        </article>
+
+        <article class="empty-state" th:if="${#lists.isEmpty(curriculums)}">
+            <h2>No curriculum records yet</h2>
+            <p>Create a record to map CLOs, PLOs, stakeholder feedback, and revision approvals.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

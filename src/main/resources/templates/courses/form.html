@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Course | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page narrow">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Course Delivery</p>
+            <h1 th:text="${course.id == null ? 'Create Course' : 'Update Course'}">Create Course</h1>
+        </div>
+    </div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${course}" method="post">
+        <label>
+            Course Code
+            <input type="text" th:field="*{code}" placeholder="CSE-320" required>
+        </label>
+        <label>
+            Course Title
+            <input type="text" th:field="*{title}" placeholder="Software Engineering" required>
+        </label>
+        <label>
+            Semester
+            <input type="text" th:field="*{semester}" placeholder="Spring 2026">
+        </label>
+        <label th:if="${currentUser.admin}">
+            Teacher
+            <select name="teacherId">
+                <option th:each="teacher : ${teachers}"
+                        th:value="${teacher.id}"
+                        th:selected="${course.teacher != null and course.teacher.id == teacher.id}"
+                        th:text="${teacher.fullName}">Teacher</option>
+            </select>
+        </label>
+        <label>
+            Description
+            <textarea th:field="*{description}" rows="5" placeholder="Short course overview"></textarea>
+        </label>
+        <button type="submit">Save Course</button>
+    </form>
+</main>
+</body>
+</html>

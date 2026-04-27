@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add User | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page narrow">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">Administration</p>
+            <h1 th:text="${userAccount.id == null ? 'Add User' : 'Update User'}">Add User</h1>
+        </div>
+    </div>
+
+    <div class="alert" th:if="${error}" th:text="${error}">Error</div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${userAccount}" method="post">
+        <label>
+            Full Name
+            <input type="text" th:field="*{fullName}" required>
+        </label>
+        <label>
+            Email
+            <input type="email" th:field="*{email}" required>
+        </label>
+        <label>
+            Password
+            <input type="text" th:field="*{password}" required>
+        </label>
+        <label>
+            Role
+            <select th:field="*{role}" required>
+                <option th:each="role : ${roles}" th:value="${role}" th:text="${role.displayName}">Role</option>
+            </select>
+        </label>
+        <label>
+            Department
+            <input type="text" th:field="*{department}">
+        </label>
+        <label class="check-row">
+            <input type="checkbox" th:field="*{active}">
+            Active account
+        </label>
+        <button type="submit">Save User</button>
+    </form>
+</main>
+</body>
+</html>

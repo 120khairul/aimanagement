@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="hero-band">
+        <div>
+            <p class="eyebrow">Dashboard</p>
+            <h1 th:text="${dashboardTitle}">Dashboard</h1>
+            <p th:text="${dashboardMessage}">Role message</p>
+        </div>
+        <span class="ai-chip" th:text="${openAiEnabled ? 'OpenAI active: ' + openAiModel : 'OpenAI key not set'}">AI status</span>
+    </div>
+
+    <section class="stats-grid">
+        <article class="stat-card" th:if="${currentUser.admin}">
+            <span>Total Users</span>
+            <strong th:text="${stats.userCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span>Courses</span>
+            <strong th:text="${stats.courseCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span th:text="${currentUser.student ? 'Available Assignments' : 'Assignments'}">Assignments</span>
+            <strong th:text="${stats.assignmentCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span th:text="${currentUser.student ? 'My Submissions' : 'Submissions'}">Submissions</span>
+            <strong th:text="${currentUser.student ? #lists.size(submissions) : stats.submissionCount}">0</strong>
+        </article>
+        <article class="stat-card" th:if="${currentUser.admin or currentUser.faculty}">
+            <span>Recheck Requests</span>
+            <strong th:text="${stats.recheckCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span>Average Score</span>
+            <strong th:text="${#numbers.formatDecimal(stats.averagePercentage, 1, 1)} + '%'">0%</strong>
+        </article>
+        <article class="stat-card" th:if="${currentUser.admin or currentUser.faculty}">
+            <span>Curriculum</span>
+            <strong th:text="${stats.curriculumCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span>FAQs</span>
+            <strong th:text="${stats.faqCount}">0</strong>
+        </article>
+        <article class="stat-card">
+            <span>Capstones</span>
+            <strong th:text="${stats.capstoneCount}">0</strong>
+        </article>
+    </section>
+
+    <section class="quick-actions">
+        <a class="action-tile ai-action" th:href="@{/ai}">
+            <strong>AI Tools</strong>
+            <span>Feedback, quiz, FAQ, curriculum, capstone drafts</span>
+        </a>
+        <a class="action-tile" th:if="${currentUser.admin}" th:href="@{/users}">
+            <strong>User Management</strong>
+            <span>Admins, faculty, students</span>
+        </a>
+        <a class="action-tile" th:href="@{/courses}">
+            <strong>Course Delivery</strong>
+            <span th:text="${currentUser.student ? 'Materials and assignments' : 'Materials, assignments, grading'}">Courses</span>
+        </a>
+        <a class="action-tile" th:if="${currentUser.admin or currentUser.faculty}" th:href="@{/curriculums}">
+            <strong>Curriculum</strong>
+            <span>CLO/PLO mapping and revision</span>
+        </a>
+        <a class="action-tile" th:href="@{/faqs}">
+            <strong>FAQs</strong>
+            <span>Common student questions</span>
+        </a>
+        <a class="action-tile" th:href="@{/capstones}">
+            <strong>Capstone</strong>
+            <span>Milestones and evaluation</span>
+        </a>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2 th:text="${activityTitle}">Recent Academic Activity</h2>
+            <a th:href="@{/courses}">View courses</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Assignment</th>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th>Marks</th>
+                    <th>Feedback</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="submission : ${submissions}">
+                    <td>
+                        <a th:href="@{/assignments/{id}(id=${submission.assignment.id})}"
+                           th:text="${submission.assignment.title}">Assignment</a>
+                    </td>
+                    <td th:text="${submission.student.fullName}">Student</td>
+                    <td><span class="badge" th:text="${submission.status.displayName}">Status</span></td>
+                    <td th:text="${submission.marks == null ? 'Pending' : submission.marks + ' / ' + submission.assignment.maxMarks}">Marks</td>
+                    <td class="clamp" th:text="${submission.feedback == null ? 'No feedback yet' : submission.feedback}">Feedback</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(submissions)}">
+                    <td colspan="5">No submissions yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

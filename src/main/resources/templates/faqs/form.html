@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Form | Academic Feedback</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page narrow">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow">FAQ</p>
+            <h1 th:text="${faqItem.id == null ? 'Create FAQ' : 'Update FAQ'}">FAQ</h1>
+            <p class="muted" th:text="${openAiEnabled ? 'OpenAI is ready: ' + openAiModel : 'Set OPENAI_API_KEY for real OpenAI answers. Local fallback still works.'}">AI status</p>
+        </div>
+    </div>
+
+    <form class="panel stack" th:action="@{${formAction}}" th:object="${faqItem}" method="post">
+        <label>
+            Course
+            <select name="courseId">
+                <option value="">All courses</option>
+                <option th:each="course : ${courses}"
+                        th:value="${course.id}"
+                        th:selected="${faqItem.course != null and faqItem.course.id == course.id}"
+                        th:text="${course.code + ' - ' + course.title}">Course</option>
+            </select>
+        </label>
+        <label>
+            Category
+            <input type="text" th:field="*{category}" placeholder="Assessment, LMS, Submission">
+        </label>
+        <label>
+            Question
+            <textarea th:field="*{question}" rows="4" required></textarea>
+        </label>
+        <label>
+            Answer
+            <textarea th:field="*{answer}" rows="7" placeholder="Leave blank or tick the box to generate an AI draft"></textarea>
+        </label>
+        <label class="check-row">
+            <input type="checkbox" name="generateWithAi" value="true">
+            Generate answer with AI
+        </label>
+        <button type="submit">Save FAQ</button>
+    </form>
+</main>
+</body>
+</html>

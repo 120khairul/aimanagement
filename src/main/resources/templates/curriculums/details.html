@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${curriculum.courseCode} + ' | Curriculum'">Curriculum</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <p class="eyebrow" th:text="${curriculum.programName}">Program</p>
+            <h1 th:text="${curriculum.courseCode + ' - ' + curriculum.courseTitle}">Course</h1>
+            <p class="muted">
+                <span th:text="${curriculum.versionName}">Version</span>
+                <span> | </span>
+                <span th:text="${curriculum.status.displayName}">Status</span>
+            </p>
+        </div>
+        <div class="actions" th:if="${currentUser.admin or currentUser.faculty}">
+            <a class="button secondary" th:href="@{/curriculums/{id}/edit(id=${curriculum.id})}">Edit</a>
+            <form th:action="@{/curriculums/{id}/ai-gap(id=${curriculum.id})}" method="post">
+                <button type="submit">Generate AI Gap Analysis</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="two-column">
+        <article class="section">
+            <div class="section-title">
+                <h2>CLO to PLO Mapping</h2>
+            </div>
+            <h3>Course Learning Outcomes</h3>
+            <pre class="suggestion" th:text="${curriculum.courseLearningOutcomes}">CLOs</pre>
+            <h3>Program Learning Outcomes</h3>
+            <pre class="suggestion" th:text="${curriculum.programLearningOutcomes}">PLOs</pre>
+        </article>
+
+        <article class="section">
+            <div class="section-title">
+                <h2>Revision Support</h2>
+            </div>
+            <h3>Industry Alignment</h3>
+            <p th:text="${curriculum.industryAlignment}">Alignment</p>
+            <h3>Peer Benchmarking</h3>
+            <p th:text="${curriculum.peerBenchmarking}">Benchmarking</p>
+            <h3>Emerging Technology Trends</h3>
+            <p th:text="${curriculum.emergingTechnologyTrends}">Trends</p>
+            <h3>Stakeholder Feedback</h3>
+            <p th:text="${curriculum.stakeholderFeedback}">Feedback</p>
+            <h3>Revision Proposal</h3>
+            <p th:text="${curriculum.revisionProposal}">Proposal</p>
+        </article>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>AI Gap Analysis</h2>
+            <span class="ai-chip" th:text="${openAiEnabled ? 'OpenAI: ' + openAiModel : 'Local fallback mode'}">AI</span>
+        </div>
+        <pre class="suggestion" th:text="${curriculum.aiGapAnalysis == null ? 'Generate an AI gap analysis after reviewing CLOs, PLOs, stakeholder feedback, and revision notes.' : curriculum.aiGapAnalysis}">AI</pre>
+    </section>
+
+    <section class="section">
+        <div class="section-title">
+            <h2>Version History</h2>
+            <form th:if="${currentUser.admin or currentUser.faculty}" th:action="@{/curriculums/{id}/delete(id=${curriculum.id})}" method="post">
+                <button class="danger" type="submit">Delete</button>
+            </form>
+        </div>
+        <pre class="suggestion" th:text="${curriculum.versionHistory}">History</pre>
+    </section>
+</main>
+</body>
+</html>
